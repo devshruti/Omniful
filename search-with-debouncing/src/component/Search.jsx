@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-// Simulated API call to fetch results
-const fetchSearchResults = (query) => {
-    // Simulated data source
-    const allResults = [
+// Simulated function to fetch search results
+const simulateFetchResults = (searchTerm) => {
+    // Sample data for demonstration
+    const data = [
         "apple",
         "banana",
         "apricot",
@@ -17,62 +17,63 @@ const fetchSearchResults = (query) => {
 
     return new Promise((resolve) => {
         setTimeout(() => {
-            const filteredResults = allResults.filter(item => item.toLowerCase().includes(query.toLowerCase()));
-            resolve(filteredResults);
-        }, 500); // Simulate a delay of 500ms
+            // Filter data to include items that match the search term
+            const filteredItems = data.filter(item => item.toLowerCase().includes(searchTerm.toLowerCase()));
+            resolve(filteredItems);
+        }, 500); // Simulate network delay
     });
 };
 
-function Search() {
-    const [query, setQuery] = useState('');
-    const [results, setResults] = useState([]);
-    const [loading, setLoading] = useState(false);
+function SearchComponent() {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredItems, setFilteredItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Function to handle the search
-    const handleSearch = useCallback(async (query) => {
-        if (query) {
-            setLoading(true);
-            const results = await fetchSearchResults(query);
-            setResults(results);
-            setLoading(false);
+    // Function to perform the search
+    const search = useCallback(async (term) => {
+        if (term) {
+            setIsLoading(true);
+            const results = await simulateFetchResults(term);
+            setFilteredItems(results);
+            setIsLoading(false);
         } else {
-            setResults([]);
+            setFilteredItems([]);
         }
     }, []);
 
-    // Debounce function to minimize the number of API calls
-    const debounce = (func, delay) => {
-        let debounceTimer;
+    // Debounce utility to limit the frequency of API calls
+    const debounceFunction = (fn, wait) => {
+        let timeout;
         return function (...args) {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => func.apply(this, args), delay);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), wait);
         };
     };
 
-    // Wrapped search function with debounce
-    const debouncedSearch = useCallback(debounce(handleSearch, 300), [handleSearch]);
+    // Create a debounced version of the search function
+    const debouncedSearch = useCallback(debounceFunction(search, 300), [search]);
 
-    // Effect to call the debounced search function
+    // Trigger the debounced search whenever the search term changes
     useEffect(() => {
-        debouncedSearch(query);
-    }, [query, debouncedSearch]);
+        debouncedSearch(searchTerm);
+    }, [searchTerm, debouncedSearch]);
 
     return (
         <div>
             <input
                 type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Type to search..."
             />
-            {loading && <p>Loading...</p>}
-            <div id="results">
-                {results.map((result, index) => (
-                    <div key={index}>{result}</div>
+            {isLoading && <p>Loading results...</p>}
+            <div>
+                {filteredItems.map((item, idx) => (
+                    <div key={idx}>{item}</div>
                 ))}
             </div>
         </div>
     );
 }
 
-export default Search;
+export default SearchComponent;
