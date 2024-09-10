@@ -1,23 +1,27 @@
 import logo from './logo.svg';
 import './App.css';
+import TaskInput from './components/TaskInput';
+import TaskList from './components/TaskList';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, deleteTask } from './Redux/action';
 
 function App() {
+  const tasks = useSelector(state => state.tasks);
+  const dispatch = useDispatch();
+
+  const handleAddTask = (task) => {
+    dispatch(addTask(task));
+  };
+
+  const handleDeleteTask = (index) => {
+    dispatch(deleteTask(index));
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Task Manager</h1>
+      <TaskInput addTask={handleAddTask} />
+      <TaskList tasks={tasks} deleteTask={handleDeleteTask} />
     </div>
   );
 }
